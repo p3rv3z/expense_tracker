@@ -33,4 +33,22 @@ export default class CategoriesController {
     await category.delete()
     return category
   }
+
+  public async rank({ params }: HttpContextContract) {
+
+    const relations = {
+      expense: 'expenses',
+      income: 'incomes'
+    }
+
+    const categories = await Category
+      .query()
+      .where('type', params.type)
+      .select('id', 'name')
+      .withAggregate(relations[params.type], (query) => {
+        query.sum('amount').as('total_amount')
+      })
+      .orderBy('total_amount', 'desc')
+    return categories
+  }
 }

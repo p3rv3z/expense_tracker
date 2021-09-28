@@ -7,7 +7,7 @@ export default class Expense extends BaseModel {
   public id: number
 
   @column()
-  public category_id: number
+  public categoryId: number
 
   @column()
   public amount: number

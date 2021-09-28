@@ -4,6 +4,9 @@ import Income from './Income'
 import Expense from './Expense'
 
 export default class Category extends BaseModel {
+
+  public serializeExtras = true
+
   @column({ isPrimary: true })
   public id: number
 
