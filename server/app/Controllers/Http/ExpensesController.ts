@@ -3,8 +3,16 @@ import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Expense from 'App/Models/Expense'
 
 export default class ExpensesController {
-  public async index({}: HttpContextContract) {
-    return Expense.query().orderBy('id')
+  public async index({ request }: HttpContextContract) {
+    const expense = Expense.query().orderBy('id')
+    const category = request.input('category')
+
+    if(category != null)
+      await expense.whereHas('category', query => {
+        query.where('name', category).where('type', 'expense')
+      })
+
+    return expense
   }
 
   public async store({ request, response }: HttpContextContract) {
