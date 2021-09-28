@@ -10,7 +10,7 @@ export default class Expense extends BaseModel {
   public category_id: number
 
   @column()
-  public name: string
+  public amount: number
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

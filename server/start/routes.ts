@@ -26,3 +26,7 @@ Route.get('/', async ({ view }) => {
 
 Route.get('api/:type/categories', 'CategoriesController.index').as('categories.index')
 Route.resource('api/categories', 'CategoriesController').only(['store', 'update', 'destroy'])
+
+Route.resource('api/expenses', 'ExpensesController').only(['index','store'])
+
+Route.resource('api/incomes', 'IncomesController').only(['index','store'])
