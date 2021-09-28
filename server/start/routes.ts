@@ -23,3 +23,6 @@ import Route from '@ioc:Adonis/Core/Route'
 Route.get('/', async ({ view }) => {
   return view.render('welcome')
 })
+
+Route.get('api/:type/categories', 'CategoriesController.index').as('categories.index')
+Route.resource('api/categories', 'CategoriesController').only(['store', 'update', 'destroy'])

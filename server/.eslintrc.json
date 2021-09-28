@@ -3,5 +3,6 @@
   "plugins": ["prettier"],
   "rules": {
     "prettier/prettier": ["error"]
-  }
+  },
+  "project": "expense_tracker/server/tsconfig.json"
 }
