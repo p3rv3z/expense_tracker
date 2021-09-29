@@ -24,7 +24,9 @@ export default class ExpensesController {
       ]),
     })
     const payload = await request.validate({ schema: expenseSchema })
-    const expense = await Expense.create(payload)
+    const data = await Expense.create(payload)
+    const expense = await Expense.query().where('id', data.id).preload('category').first()
+
     return response.status(201).send(expense)
   }
 }

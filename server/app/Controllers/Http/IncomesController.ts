@@ -25,7 +25,8 @@ export default class IncomesController {
       ]),
     })
     const payload = await request.validate({ schema: incomeSchema })
-    const income = await Income.create(payload)
+    const data = await Income.create(payload)
+    const income = await Income.query().where('id', data.id).preload('category').first()
     return response.status(201).send(income)
   }
 }
