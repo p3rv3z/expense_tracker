@@ -3,7 +3,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <div class="h4 text-danger">Category Ranking</div>
+                    <div class="h4 text-primary">Category Ranking</div>
                 </div>
                 <div class="col-md-6">
                     <select
