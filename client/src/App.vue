@@ -2,11 +2,14 @@
     <div id="app">
         <b-navbar variant="primary" type="dark">
             <b-container>
-                <b-navbar-brand>Income and Expense Tracker</b-navbar-brand>
+                <b-navbar-brand><h3>Income and Expense Tracker</h3></b-navbar-brand>
             </b-container>
         </b-navbar>
         <b-container class="mt-4">
             <div class="row">
+                <div class="col-md-6">
+                    <income></income>
+                </div>
                 <div class="col-md-6">
                     <expense></expense>
                 </div>
@@ -24,6 +27,7 @@
 </template>
 
 <script>
+import Income from './components/Income'
 import Expense from './components/Expense'
 import Category from './components/Category'
 import CategoryRank from './components/CategoryRank'
@@ -32,6 +36,7 @@ export default {
     name: 'App',
 
     components: {
+        Income,
         Expense,
         Category,
         CategoryRank,
