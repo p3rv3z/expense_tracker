@@ -1,5 +1,5 @@
 <template>
-    <div >
+    <div>
         <div class="card">
             <div class="card-body">
                 <div class="row">
@@ -25,28 +25,38 @@
                     </div>
                 </div>
 
-                <table class="table mt-4">
-                    <tbody>
-                        <tr v-for="(category, i) in categories" :key="i">
-                            <td>{{ category.name }}</td>
-                            <td>
-                                <div
-                                    class="btn btn-sm btn-outline-primary mr-2"
-                                >
-                                    <b-icon-pen
-                                        @click="editCategory(category)"
-                                        v-b-modal.edit-model
-                                    ></b-icon-pen>
-                                </div>
-                                <div class="btn btn-sm btn-outline-danger">
-                                    <b-icon-trash
-                                        @click="deleteCategory(category)"
-                                    ></b-icon-trash>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="mt-4">
+                    <ul v-if="categories.length" class="list-group">
+                        <li
+                            v-for="(category, i) in categories"
+                            :key="i"
+                            class="list-group-item"
+                        >
+                            <b-row>
+                                <b-col cols="10">
+                                    {{ category.name }}
+                                </b-col>
+
+                                <b-col cols="2">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-sm btn-outline-primary mr-2" >
+                                            <b-icon-pen @click="editCategory(category)" v-b-modal.edit-model ></b-icon-pen>
+                                        </div>
+                                        <div class="btn btn-sm btn-outline-danger">
+                                            <b-icon-trash @click="deleteCategory(category)" ></b-icon-trash>
+                                        </div>
+                                    </div>
+                                </b-col>
+                            
+                            </b-row>
+
+                        </li>
+                    </ul>
+
+                    <ul v-else class="list-group">
+                        <li class="list-group-item">No records found!</li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -151,7 +161,7 @@ export default {
         //model
         resetModal() {
             this.payload.name = '',
-            this.payload.type = ''
+                this.payload.type = ''
         },
 
         handleSave(bvModalEvt) {
@@ -176,8 +186,10 @@ export default {
 
             const category = await HTTP().post(`categories`, this.payload)
 
-            if (this.payload.type == this.filter.type)
+            if (this.payload.type == this.filter.type || this.filter.type == 'all')
                 this.categories.push(category.data)
+
+            this.reloadCategories()
 
             this.$nextTick(() => {
                 this.$bvModal.hide('create-model')
@@ -188,6 +200,8 @@ export default {
             this.oldCategory = category
             this.$set(this.payload, 'name', category.name)
             this.$set(this.payload, 'type', category.type)
+
+            this.reloadCategories()
         },
 
         async updateCategory() {
@@ -200,12 +214,21 @@ export default {
             this.$nextTick(() => {
                 this.$bvModal.hide('edit-model')
             })
+
+            this.reloadCategories()
         },
 
         async deleteCategory(category) {
             await HTTP().delete(`categories/${category.id}`)
             this.categories.splice(this.categories.indexOf(category), 1)
 
+            this.reloadCategories()
+        },
+
+        reloadCategories() {
+            this.$root.$refs.expenses.fetchCategories();
+            this.$root.$refs.incomes.fetchCategories();
+            this.$root.$refs.categories_rank.fetchCategories();
         }
     },
 
