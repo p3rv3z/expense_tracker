@@ -3,7 +3,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <div class="h4 text-primary">Category Ranking</div>
+                    <div class="h4 text-primary">Categories Ranking</div>
                 </div>
                 <div class="col-md-6">
                     <select
@@ -19,12 +19,22 @@
             </div>
 
             <div class="mt-4">
-                <ul class="list-group">
-                    <li v-for="(category, i) in categories" :key="i" class="list-group-item">
+                <ul v-if="categories.length" class="list-group">
+                    <li
+                        v-for="(category, i) in categories"
+                        :key="i"
+                        class="list-group-item"
+                    >
                         {{ category.name }}
-                        <span v-if="category.meta.total_amount">({{category.meta.total_amount}})</span>
+                        <span v-if="category.meta.total_amount"
+                            >({{ category.meta.total_amount }})</span
+                        >
                         <span v-else>(0)</span>
                     </li>
+                </ul>
+
+                <ul v-else class="list-group">
+                    <li class="list-group-item">No records found!</li>
                 </ul>
             </div>
         </div>
@@ -59,6 +69,7 @@ export default {
     },
 
     created() {
+        this.$root.$refs.categories_rank = this;
         this.fetchCategories()
     },
 }

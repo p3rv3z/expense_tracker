@@ -1,5 +1,5 @@
 <template>
-    <div >
+    <div>
         <div class="card">
             <div class="card-body">
                 <div class="row">
@@ -14,11 +14,20 @@
                             id="type"
                         >
                             <option value="all">All</option>
-                            <option v-for="(category, i) in categories" :value="category.id" :key="i">{{category.name}}</option>
+                            <option
+                                v-for="(category, i) in categories"
+                                :value="category.id"
+                                :key="i"
+                            >
+                                {{ category.name }}
+                            </option>
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <div class="btn btn-warning" v-b-modal.create-income-model>
+                        <div
+                            class="btn btn-warning"
+                            v-b-modal.create-income-model
+                        >
                             Add
                         </div>
                     </div>
@@ -26,19 +35,30 @@
 
                 <div class="mt-4">
                     <table class="table">
-                    <thead>
-                        <tr>
-                            <td>Amount</td>
-                            <td class="text-center">Date</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(income, i) in incomes" :key="i">
-                            <td>{{ income.amount }}TK</td>
-                            <td class="text-center">{{ formatDate(income.created_at) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th class="text-center">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody v-if="incomes.length">
+                            <tr v-for="(income, i) in incomes" :key="i">
+                                <td>{{ income.category.name }}</td>
+                                <td>{{ income.amount }}TK</td>
+                                <td class="text-center">
+                                    {{ formatDate(income.created_at) }}
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody v-else>
+                            <tr>
+                                <td colspan="3" class="text-center">
+                                    No reocords found!
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -72,7 +92,13 @@
                             id="category_id"
                         >
                             <option value="">Setect one</option>
-                            <option v-for="(category, i) in categories" :value="category.id" :key="i">{{category.name}}</option>
+                            <option
+                                v-for="(category, i) in categories"
+                                :value="category.id"
+                                :key="i"
+                            >
+                                {{ category.name }}
+                            </option>
                         </select>
                     </div>
                 </form>
@@ -108,7 +134,7 @@ export default {
     methods: {
 
         formatDate(date) {
-            return moment(date).format("MMM Do Y"); 
+            return moment(date).format("MMM Do Y");
         },
 
         //model
@@ -130,7 +156,7 @@ export default {
             })
             this.categories = data.data
         },
-        
+
         async fetchIncomes() {
             const data = await HTTP().get(`incomes`, {
                 params: this.filter
@@ -140,21 +166,25 @@ export default {
 
         async createExpense() {
 
-            console.log(this.payload)
-             const income = await HTTP().post(`incomes`, this.payload)
+            const income = await HTTP().post(`incomes`, this.payload)
 
-            if (this.filter.category_id == 'all' || this.payload.category_id == this.filter.category_id)   
+            console.log(income.data)
+            if (this.filter.category_id == 'all' || this.payload.category_id == this.filter.category_id)
                 this.incomes.push(income.data)
-            
+
             this.$nextTick(() => {
                 this.$bvModal.hide('create-income-model')
             })
+
+            this.$root.$refs.categories_rank.fetchCategories();
         },
     },
 
     created() {
+        this.$root.$refs.incomes = this;
         this.fetchCategories()
         this.fetchIncomes()
     },
+
 }
 </script>

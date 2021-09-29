@@ -28,14 +28,21 @@
                     <table class="table">
                     <thead>
                         <tr>
-                            <td>Amount</td>
-                            <td class="text-center">Date</td>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th class="text-center">Date</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody v-if="expenses.length">
                         <tr v-for="(expense, i) in expenses" :key="i">
+                            <td>{{ expense.category.name }}</td>
                             <td>{{ expense.amount }}TK</td>
                             <td class="text-center">{{ formatDate(expense.created_at) }}</td>
+                        </tr>
+                    </tbody>
+                    <tbody v-else>
+                        <tr>
+                            <td colspan="3" class="text-center">No reocords found!</td>
                         </tr>
                     </tbody>
                 </table>
@@ -149,10 +156,13 @@ export default {
             this.$nextTick(() => {
                 this.$bvModal.hide('create-expense-model')
             })
+
+            this.$root.$refs.categories_rank.fetchCategories();
         },
     },
 
     created() {
+        this.$root.$refs.expenses = this;
         this.fetchCategories()
         this.fetchExpenses()
     },
