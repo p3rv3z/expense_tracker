@@ -5,15 +5,13 @@ import Income from 'App/Models/Income'
 export default class IncomesController {
   public async index({request}: HttpContextContract) {
 
-    const income = Income.query().orderBy('id')
-    const category = request.input('category')
+    const incomes = Income.query().preload('category').orderBy('id')
+    const category_id = request.input('category_id')
 
-    if(category != null || category != '')
-      await income.whereHas('category', query => {
-        query.where('name', category).where('type', 'income')
-      })
+    if(category_id != 'all')
+      await incomes.where('category_id', category_id)
 
-    return income
+    return incomes
   }
 
   public async store({ request, response }: HttpContextContract) {

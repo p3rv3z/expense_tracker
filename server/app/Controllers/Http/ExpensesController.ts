@@ -4,15 +4,13 @@ import Expense from 'App/Models/Expense'
 
 export default class ExpensesController {
   public async index({ request }: HttpContextContract) {
-    const expense = Expense.query().orderBy('id')
-    const category = request.input('category')
+    const expenses = Expense.query().preload('category').orderBy('id')
+    const category_id = request.input('category_id')
 
-    if(category != null)
-      await expense.whereHas('category', query => {
-        query.where('name', category).where('type', 'expense')
-      })
+    if(category_id != 'all')
+      await expenses.where('category_id', category_id)
 
-    return expense
+    return expenses
   }
 
   public async store({ request, response }: HttpContextContract) {
