@@ -4,8 +4,17 @@ import Category from 'App/Models/Category'
 
 export default class CategoriesController {
 
-  public async index({ params }: HttpContextContract) {
-    return Category.query().where('type', params.type).orderBy('name')
+  public async index({ request }: HttpContextContract) {
+
+    const categories = Category.query().orderBy('id')
+
+    const type = request.input('type')
+
+    if(type != 'all'){
+      await categories.where('type', type)
+    }
+
+    return categories
   }
 
   public async store({ request, response }: HttpContextContract) {
@@ -34,18 +43,20 @@ export default class CategoriesController {
     return category
   }
 
-  public async rank({ params }: HttpContextContract) {
+  public async rank({ request }: HttpContextContract) {
 
     const relations = {
       expense: 'expenses',
       income: 'incomes'
     }
 
+    const type = request.input('type')
+
     const categories = await Category
       .query()
-      .where('type', params.type)
+      .where('type', type)
       .select('id', 'name')
-      .withAggregate(relations[params.type], (query) => {
+      .withAggregate(relations[type], (query) => {
         query.sum('amount').as('total_amount')
       })
       .orderBy('total_amount', 'desc')

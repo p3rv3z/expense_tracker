@@ -24,9 +24,9 @@ Route.get('/', async ({ view }) => {
   return view.render('welcome')
 })
 
-Route.get('api/rank/:type', 'CategoriesController.rank')
-Route.get('api/:type/categories', 'CategoriesController.index')
-Route.resource('api/categories', 'CategoriesController').only(['store', 'update', 'destroy'])
+Route.get('api/categories/rank', 'CategoriesController.rank')
+
+Route.resource('api/categories', 'CategoriesController').only(['index', 'store', 'update', 'destroy'])
 
 Route.resource('api/expenses', 'ExpensesController').only(['index','store'])
 
