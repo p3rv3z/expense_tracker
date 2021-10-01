@@ -57,20 +57,19 @@ export default {
         }
     },
 
+    created() {
+        this.$root.$refs.categories_rank = this;
+        this.fetchCategories()
+    },
+
     methods: {
 
         async fetchCategories() {
-            console.log(this.filter)
             const data = await HTTP().get(`categories/rank`, {
                 params: this.filter
             })
             this.categories = data.data
         },
-    },
-
-    created() {
-        this.$root.$refs.categories_rank = this;
-        this.fetchCategories()
-    },
+    }
 }
 </script>

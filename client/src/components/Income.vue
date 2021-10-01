@@ -67,17 +67,28 @@
             <b-modal
                 id="create-income-model"
                 ref="modal"
-                title="Add Expense"
+                title="Add Income"
                 @show="resetModal"
                 @hidden="resetModal"
                 @ok="handleSave"
             >
+                <div v-if="anyErrors">
+                    <ul>
+                        <li
+                            class="text-danger"
+                            v-for="error in errors.messages"
+                            :key="error.field"
+                        >
+                            {{ error.message }}
+                        </li>
+                    </ul>
+                </div>
                 <form ref="form" @submit.stop.prevent="handleSubmit">
                     <div class="form-group mt-2">
                         <label for="amount">Amount</label>
                         <input
                             v-model="payload.amount"
-                            type="text"
+                            type="number"
                             class="form-control"
                             id="amount"
                             placeholder="Enter Amount"
@@ -112,13 +123,14 @@ import HTTP from '../services/http';
 import moment from 'moment';
 
 export default {
-    name: 'Expense',
+    name: 'Income',
 
     data() {
         return {
             incomes: [],
 
             categories: [],
+
 
             payload: {
                 amount: "",
@@ -127,26 +139,28 @@ export default {
 
             filter: {
                 category_id: 'all'
-            }
+            },
+
+            errors: {
+                status: null,
+                messages: []
+            },
         }
     },
 
+    computed: {
+        anyErrors() {
+            return this.errors.status === 422 && this.errors.messages.length > 0
+        }
+    },
+
+    created() {
+        this.$root.$refs.incomes = this;
+        this.fetchCategories()
+        this.fetchIncomes()
+    },
+
     methods: {
-
-        formatDate(date) {
-            return moment(date).format("MMM Do Y");
-        },
-
-        //model
-        resetModal() {
-            this.payload.amount = '',
-                this.payload.category_id = ''
-        },
-
-        handleSave(bvModalEvt) {
-            bvModalEvt.preventDefault()
-            this.createExpense()
-        },
 
         async fetchCategories() {
             const data = await HTTP().get(`categories`, {
@@ -164,26 +178,46 @@ export default {
             this.incomes = data.data
         },
 
-        async createExpense() {
+        async createIncome() {
+            try {
+                const income = await HTTP().post(`incomes`, this.payload)
+                
+                if (this.filter.category_id == 'all' || this.payload.category_id == this.filter.category_id)
+                    this.incomes.push(income.data)
+                
+                this.$nextTick(() => {
+                    this.$bvModal.hide('create-income-model')
+                })
 
-            const income = await HTTP().post(`incomes`, this.payload)
+                this.$root.$refs.categories_rank.fetchCategories()
 
-            console.log(income.data)
-            if (this.filter.category_id == 'all' || this.payload.category_id == this.filter.category_id)
-                this.incomes.push(income.data)
-
-            this.$nextTick(() => {
-                this.$bvModal.hide('create-income-model')
-            })
-
-            this.$root.$refs.categories_rank.fetchCategories();
+            } catch (error) {
+                this.errors.messages = error.response.data.errors
+                this.errors.status = error.response.status
+            }
         },
-    },
 
-    created() {
-        this.$root.$refs.incomes = this;
-        this.fetchCategories()
-        this.fetchIncomes()
+        formatDate(date) {
+            return moment(date).format("MMM Do Y");
+        },
+
+        //model
+        resetModal() {
+            this.payload.amount = ''
+            this.payload.category_id = ''
+
+            this.resetErrors()
+        },
+
+        resetErrors() {
+            this.errors.status = null,
+            this.errors.messages = []
+        },
+
+        handleSave(bvModalEvt) {
+            bvModalEvt.preventDefault()
+            this.createIncome()
+        }
     },
 
 }

@@ -39,17 +39,31 @@
 
                                 <b-col cols="2">
                                     <div class="d-flex justify-content-between">
-                                        <div class="btn btn-sm btn-outline-primary mr-2" >
-                                            <b-icon-pen @click="editCategory(category)" v-b-modal.edit-model ></b-icon-pen>
+                                        <div
+                                            class="
+                                                btn btn-sm btn-outline-primary
+                                                mr-2
+                                            "
+                                        >
+                                            <b-icon-pen
+                                                @click="editCategory(category)"
+                                                v-b-modal.edit-model
+                                            ></b-icon-pen>
                                         </div>
-                                        <div class="btn btn-sm btn-outline-danger">
-                                            <b-icon-trash @click="deleteCategory(category)" ></b-icon-trash>
+                                        <div
+                                            class="
+                                                btn btn-sm btn-outline-danger
+                                            "
+                                        >
+                                            <b-icon-trash
+                                                @click="
+                                                    deleteCategory(category)
+                                                "
+                                            ></b-icon-trash>
                                         </div>
                                     </div>
                                 </b-col>
-                            
                             </b-row>
-
                         </li>
                     </ul>
 
@@ -69,6 +83,17 @@
                 @hidden="resetModal"
                 @ok="handleSave"
             >
+                <div v-if="anyErrors">
+                    <ul>
+                        <li
+                            class="text-danger"
+                            v-for="error in errors.messages"
+                            :key="error.field"
+                        >
+                            {{ error.message }}
+                        </li>
+                    </ul>
+                </div>
                 <form ref="form" @submit.stop.prevent="handleSubmit">
                     <div class="form-group mt-2">
                         <label for="name">Name</label>
@@ -103,6 +128,17 @@
                 @hidden="resetModal"
                 @ok="handleUpdate"
             >
+                <div v-if="anyErrors">
+                    <ul>
+                        <li
+                            class="text-danger"
+                            v-for="error in errors.messages"
+                            :key="error.field"
+                        >
+                            {{ error.message }}
+                        </li>
+                    </ul>
+                </div>
                 <form ref="form" @submit.stop.prevent="handleSubmit">
                     <div class="form-group mt-2">
                         <label for="name">Name</label>
@@ -152,30 +188,29 @@ export default {
 
             filter: {
                 type: 'all'
-            }
+            },
+
+            errors: {
+                status: null,
+                messages: []
+            },
         }
+    },
+
+    computed: {
+        anyErrors() {
+            return this.errors.status === 422 && this.errors.messages.length > 0
+        }
+    },
+
+    created() {
+        this.fetchCategories()
     },
 
     methods: {
 
-        //model
-        resetModal() {
-            this.payload.name = '',
-                this.payload.type = ''
-        },
-
-        handleSave(bvModalEvt) {
-            bvModalEvt.preventDefault()
-            this.createCategory()
-        },
-
-        handleUpdate(bvModalEvt) {
-            bvModalEvt.preventDefault()
-            this.updateCategory()
-        },
-
         async fetchCategories() {
-            console.log(this.filter)
+
             const data = await HTTP().get(`categories`, {
                 params: this.filter
             })
@@ -183,17 +218,22 @@ export default {
         },
 
         async createCategory() {
+            try {
+                const category = await HTTP().post(`categories`, this.payload)
 
-            const category = await HTTP().post(`categories`, this.payload)
+                if (this.payload.type == this.filter.type || this.filter.type == 'all')
+                    this.categories.push(category.data)
 
-            if (this.payload.type == this.filter.type || this.filter.type == 'all')
-                this.categories.push(category.data)
+                this.$nextTick(() => {
+                    this.$bvModal.hide('create-model')
+                })
 
-            this.reloadCategories()
+                this.reloadCategories()
 
-            this.$nextTick(() => {
-                this.$bvModal.hide('create-model')
-            })
+            } catch (error) {
+                this.errors.messages = error.response.data.errors
+                this.errors.status = error.response.status
+            }
         },
 
         editCategory(category) {
@@ -205,17 +245,22 @@ export default {
         },
 
         async updateCategory() {
+            try {
+                const category = await HTTP().put(`categories/${this.oldCategory.id}`, this.payload)
 
-            const category = await HTTP().put(`categories/${this.oldCategory.id}`, this.payload)
+                this.$set(this.oldCategory, 'name', category.data.name)
+                this.$set(this.oldCategory, 'type', category.data.type)
 
-            this.$set(this.oldCategory, 'name', category.data.name)
-            this.$set(this.oldCategory, 'type', category.data.type)
+                this.$nextTick(() => {
+                    this.$bvModal.hide('edit-model')
+                })
 
-            this.$nextTick(() => {
-                this.$bvModal.hide('edit-model')
-            })
+                this.reloadCategories()
 
-            this.reloadCategories()
+            } catch (error) {
+                this.errors.messages = error.response.data.errors
+                this.errors.status = error.response.status
+            }
         },
 
         async deleteCategory(category) {
@@ -229,11 +274,30 @@ export default {
             this.$root.$refs.expenses.fetchCategories();
             this.$root.$refs.incomes.fetchCategories();
             this.$root.$refs.categories_rank.fetchCategories();
-        }
-    },
+        },
 
-    created() {
-        this.fetchCategories()
+        //model
+        resetModal() {
+            this.payload.name = ''
+            this.payload.type = ''
+
+            this.resetErrors()
+        },
+
+        resetErrors() {
+            this.errors.status = null,
+            this.errors.messages = []
+        },
+
+        handleSave(bvModalEvt) {
+            bvModalEvt.preventDefault()
+            this.createCategory()
+        },
+
+        handleUpdate(bvModalEvt) {
+            bvModalEvt.preventDefault()
+            this.updateCategory()
+        }
     },
 }
 </script>
