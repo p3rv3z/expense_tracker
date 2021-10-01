@@ -24,7 +24,13 @@ export default class IncomesController {
         rules.exists({ table: 'categories', column: 'id'})
       ]),
     })
-    const payload = await request.validate({ schema: incomeSchema })
+
+    const payload = await request.validate({ schema: incomeSchema, messages: {
+      required: 'The {{ field }} field is required.',
+      number: 'The {{ field }} field should be a number.',
+      exists: 'The {{ field}} should be exist in categories table.'
+    } })
+
     const data = await Income.create(payload)
     const income = await Income.query().where('id', data.id).preload('category').first()
     return response.status(201).send(income)

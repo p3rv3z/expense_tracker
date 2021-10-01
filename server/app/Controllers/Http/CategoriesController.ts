@@ -22,7 +22,11 @@ export default class CategoriesController {
       name: schema.string({}, [rules.maxLength(250)]),
       type: schema.enum(['expense', 'income'] as const),
     })
-    const payload = await request.validate({ schema: categorySchema })
+    const payload = await request.validate({ schema: categorySchema, messages: {
+      required: 'The {{ field }} field is required.',
+      'maxLength': 'The {{ field }} must not be greater than {{ options.maxLength }} characters.',
+      enum: 'The value of {{ field }} must be in {{ options.choices }}.'
+    } })
     const category = await Category.create(payload)
     return response.status(201).send(category)
   }
@@ -32,7 +36,11 @@ export default class CategoriesController {
       name: schema.string({}, [rules.maxLength(250)]),
       type: schema.enum(['expense', 'income'] as const),
     })
-    const payload = await request.validate({ schema: categorySchema })
+    const payload = await request.validate({ schema: categorySchema, messages: {
+      required: 'The {{ field }} field is required.',
+      'maxLength': 'The {{ field }} must not be greater than {{ options.maxLength }} characters.',
+      enum: 'The value of {{ field }} must be in {{ options.choices }}.'
+    } })
     const category = await Category.findOrFail(params.id)
     return category.merge(payload).save()
   }
